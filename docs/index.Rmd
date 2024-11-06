@@ -10,3 +10,11 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
+Seeing whether living standards has an impact on chronic repiratory infections in children by looking at the association of COPD prescriped inhalers with SIMD. 
+
+Prescriptions data taken from August of every year to mitigate the effect of 'flu season' infections as a factor
+
+Drugs:
+LA bronchodilators - for those who experience symtoms regularly or have flare ups despite using SA, therefore infections more likely to be chronic/recurring
+
+salmeterol, fromoterol, indacaterol, tiotropium, glycopyronium, aclidinium
