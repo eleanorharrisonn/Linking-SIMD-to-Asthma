@@ -9,12 +9,82 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+# Introduction
 
-Seeing whether living standards has an impact on chronic repiratory infections in children by looking at the association of COPD prescriped inhalers with SIMD. 
+Aspergillus is common mould found both outdoors and indoor. It is an airborne opportunisitc fungal pathogen that can cause aspergillosis; a fungal infection of the lungs (Mousavi, 2016).
 
-Prescriptions data taken from August of every year to mitigate the effect of 'flu season' infections as a factor
 
-Drugs:
-LA bronchodilators - for those who experience symtoms regularly or have flare ups despite using SA, therefore infections more likely to be chronic/recurring
+There is a lack of accurate data on those in social housing experiencing damp and mould and the issue is much more serious than some surverys would suggest (The Scottish Parliament, 2023).
 
-salmeterol, fromoterol, indacaterol, tiotropium, glycopyronium, aclidinium
+
+This exploratory data analysis will investigate whether living standards have an impact on the prevalence of respiratory infections. To do this, living standards will be defined by SIMD and prevalence of infections will be measured by the number of prescriptions of common antibiotics for aspergillosis.
+
+## Data chosen for Analysis
+
+The drugs assessed will be voriconazole, posaconazole, isavuconazole, liposomal amphetricin, amphotericin B
+(Douglas et al., 2021)
+
+SIMD data is released every 4 years, the dataset used will be the most recent data from 2020.
+
+Prescriptions data used will be from 2020 to correspond with SIMD year.
+
+Data will be analysed by GP Practice as healthboard would be harder to show trends due to large variation in SIMD.
+
+```{r libraries, include=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(janitor)
+library(dplyr)
+library(knitr)
+library(kableExtra)
+library(here)
+```
+
+### Loading Datasets
+
+```{r loading data}
+# loading datasets with desired variables selected
+# some variables have been renamed for continuity between datasets
+# clean names also used for continuity
+simd2020 <- read_csv("data/simd2020.csv") %>% 
+  clean_names() %>% 
+    select(data_zone, simd2020v2country_decile)
+
+gp_practices <- read_csv("data/practice_contactdetails_oct2020-open-data.csv") %>% 
+  rename(practice_name = GPPracticeName) %>% 
+  clean_names() %>% 
+  select(practice_code, data_zone)
+
+# prescriptions data taken from jan-dec 2020, 
+files <- list.files(here("data", "data_2020"), pattern = "csv")
+all_prescriptions_2020 <- files %>% 
+  map_dfr(~read_csv(here("data", "data_2020", .)))
+
+```
+
+```{r filtering}
+# filtering prescriptions for desired drugs and selecting desired columns
+aspergillosis_prescriptions <- all_prescriptions_2020 %>% 
+  rename(HB = HBT) %>%
+  rename(practice_code = GPPractice) %>% 
+  clean_names() %>% 
+  select(practice_code, bnf_item_description, number_of_paid_items)%>% 
+  filter(str_detect(bnf_item_description, "VORICONAZOLE|POSACONAZOLE|ISUVACONAZOLE|AMPHOTERECIN"))
+```
+
+The three datasets used for this analysis differ by the areas given therefore cannot be joined by a common factor. Therefore SIMD and GP datasets will be joined by data zone, and GP and prescriptions dataset will be joined by practice code (this is under the assumptiosn that the practice is in the datazone).
+
+```{r joins}
+prescriptions_gp_join <- left_join(aspergillosis_prescriptions, gp_practices)
+
+# some practices dont have a corresponding datazone
+
+simd_gp_join <- full_join(simd2020, gp_practices)
+prescriptions_simd_gp_join <- full_join(simd_gp_join, aspergillosis_prescriptions)
+```
+
+
+
+
+
+
