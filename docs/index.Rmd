@@ -11,24 +11,19 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Introduction
 
-Aspergillus is common mould found both outdoors and indoor. It is an airborne opportunisitc fungal pathogen that can cause aspergillosis; a fungal infection of the lungs (Mousavi, 2016).
+Asthma is a common condition worldwide that can be caused by prolonged indoor exposure to mould (World Health Organization, 2024). Currently, there is a lack of accurate data on the prevalence of mould in social housing, potentially making this association more serious than expected (The Scottish Parliament, 2023).
 
-
-There is a lack of accurate data on those in social housing experiencing damp and mould and the issue is much more serious than some surverys would suggest (The Scottish Parliament, 2023).
-
-
-This exploratory data analysis will investigate whether living standards have an impact on the prevalence of respiratory infections. To do this, living standards will be defined by SIMD and prevalence of infections will be measured by the number of prescriptions of common antibiotics for aspergillosis.
+This exploratory data analysis will investigate whether living standards have an impact on the prevalence of chronic asthma. To do this, living standards will be defined by SIMD and prevalence of chronic asthma will be measured by the number of prescriptions of common preventer inhalers as these are often prscribed when long or short acting bronchodilators are ineffective, suggesitng sever chronic asthma.
 
 ## Data chosen for Analysis
 
-The drugs assessed will be voriconazole, posaconazole, isavuconazole, liposomal amphetricin, amphotericin B
-(Douglas et al., 2021)
+The prescriptions assessed are those for salbutamol, beclometasone, ciclesonide, fluticasone and mometasone as they are the most commonly prescribed preventative inhalers (Vincent, 2024)
 
 SIMD data is released every 4 years, the dataset used will be the most recent data from 2020.
 
-Prescriptions data used will be from 2020 to correspond with SIMD year.
+Prescriptions data used will be from 2020 to correspond with SIMD year in order to accurateky compare the two.
 
-Data will be analysed by GP Practice as healthboard would be harder to show trends due to large variation in SIMD.
+Data will be analysed by datazone as healthboard would be harder to show trends due to large variation in SIMD within them.
 
 ```{r libraries, include=FALSE}
 library(tidyverse)
@@ -48,7 +43,8 @@ library(here)
 # clean names also used for continuity
 simd2020 <- read_csv("data/simd2020.csv") %>% 
   clean_names() %>% 
-    select(data_zone, simd2020v2country_decile)
+  select(data_zone, simd2020v2country_decile) %>% 
+  mutate(simd2020v2country_decile = as.factor(simd2020v2country_decile))
 
 gp_practices <- read_csv("data/practice_contactdetails_oct2020-open-data.csv") %>% 
   rename(practice_name = GPPracticeName) %>% 
@@ -59,7 +55,6 @@ gp_practices <- read_csv("data/practice_contactdetails_oct2020-open-data.csv") %
 files <- list.files(here("data", "data_2020"), pattern = "csv")
 all_prescriptions_2020 <- files %>% 
   map_dfr(~read_csv(here("data", "data_2020", .)))
-
 ```
 
 ```{r filtering}
@@ -69,22 +64,31 @@ aspergillosis_prescriptions <- all_prescriptions_2020 %>%
   rename(practice_code = GPPractice) %>% 
   clean_names() %>% 
   select(practice_code, bnf_item_description, number_of_paid_items)%>% 
-  filter(str_detect(bnf_item_description, "VORICONAZOLE|POSACONAZOLE|ISUVACONAZOLE|AMPHOTERECIN"))
+  filter(str_detect(bnf_item_description, "SALBUTAMOL|BECLOMETASONE|CICLESONIDE|FLUTICASONE|MOMETASONE"))
 ```
 
 The three datasets used for this analysis differ by the areas given therefore cannot be joined by a common factor. Therefore SIMD and GP datasets will be joined by data zone, and GP and prescriptions dataset will be joined by practice code (this is under the assumptiosn that the practice is in the datazone).
 
 ```{r joins}
 prescriptions_gp_join <- left_join(aspergillosis_prescriptions, gp_practices)
-
-# some practices dont have a corresponding datazone
-
-simd_gp_join <- full_join(simd2020, gp_practices)
-prescriptions_simd_gp_join <- full_join(simd_gp_join, aspergillosis_prescriptions)
+simd_prescriptions_gp_join <- full_join(prescriptions_gp_join, simd2020)
+# some practices dont have a corresponding datazones - find later
 ```
 
 
+```{r initial plot}
+simd_prescriptions_gp_join %>% 
+  filter() %>% 
+  group_by(simd2020v2country_decile) %>% 
+  ggplot(aes(x = simd2020v2country_decile, y = number_of_paid_items)) +
+  geom_col() +
+  labs(
+    x = "SIMD Country Decile",
+    y = "Number of Items Dispensed"
+  )+
+  theme_minimal()
+```
 
-
+ 
 
 
