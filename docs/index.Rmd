@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Asthma is a common condition worldwide that can be caused by prolonged indoor exposure to mould (World Health Organization, 2024). Currently, there is a lack of accurate data on the prevalence of mould in social housing, potentially making this association more serious than expected (The Scottish Parliament, 2023).
 
-This exploratory data analysis will investigate whether living standards have an impact on the prevalence of chronic asthma. To do this, living standards will be defined by SIMD and prevalence of chronic asthma will be measured by the number of prescriptions of common preventer inhalers as these are often prscribed when long or short acting bronchodilators are ineffective, suggesitng sever chronic asthma.
+This exploratory data analysis will investigate whether living standards have an impact on the prevalence of chronic asthma. To do this, living standards will be defined by SIMD due to the associatioon of social housing with mould, and prevalence of chronic asthma will be measured by the number of prescriptions of common preventer inhalers as these are often prescribed when long or short acting bronchodilators are ineffective, suggesting severe chronic asthma.
 
 ## Data chosen for Analysis
 
@@ -38,9 +38,9 @@ library(here)
 ### Loading Datasets
 
 ```{r loading data}
-# loading datasets with desired variables selected
-# some variables have been renamed for continuity between datasets
-# clean names also used for continuity
+#loading datasets with desired variables selected
+#some variables have been renamed for continuity between datasets
+#clean names also used for continuity
 simd2020 <- read_csv("data/simd2020.csv") %>% 
   clean_names() %>% 
   select(data_zone, simd2020v2country_decile) %>% 
@@ -49,9 +49,9 @@ simd2020 <- read_csv("data/simd2020.csv") %>%
 gp_practices <- read_csv("data/practice_contactdetails_oct2020-open-data.csv") %>% 
   rename(practice_name = GPPracticeName) %>% 
   clean_names() %>% 
-  select(practice_code, data_zone)
+  select(practice_code, data_zone, hb, practice_list_size)
 
-# prescriptions data taken from jan-dec 2020, 
+#prescriptions data taken from jan-dec 2020, 
 files <- list.files(here("data", "data_2020"), pattern = "csv")
 all_prescriptions_2020 <- files %>% 
   map_dfr(~read_csv(here("data", "data_2020", .)))
@@ -59,7 +59,7 @@ all_prescriptions_2020 <- files %>%
 
 ```{r filtering}
 # filtering prescriptions for desired drugs and selecting desired columns
-aspergillosis_prescriptions <- all_prescriptions_2020 %>% 
+inhaler_prescriptions <- all_prescriptions_2020 %>% 
   rename(HB = HBT) %>%
   rename(practice_code = GPPractice) %>% 
   clean_names() %>% 
@@ -67,28 +67,39 @@ aspergillosis_prescriptions <- all_prescriptions_2020 %>%
   filter(str_detect(bnf_item_description, "SALBUTAMOL|BECLOMETASONE|CICLESONIDE|FLUTICASONE|MOMETASONE"))
 ```
 
-The three datasets used for this analysis differ by the areas given therefore cannot be joined by a common factor. Therefore SIMD and GP datasets will be joined by data zone, and GP and prescriptions dataset will be joined by practice code (this is under the assumptiosn that the practice is in the datazone).
+The three datasets used for this analysis (GP practice, SIMD and Prescriptions data) differ by the variables used for location markers therefore cannot be joined by a common factor.
+Therefore SIMD and GP datasets will be joined by data zone, and GP and prescriptions datasets will be joined by practice code (this is under the assumption that the practice is in the datazone). SIMD is hence determined by GP practice location.
 
 ```{r joins}
-prescriptions_gp_join <- left_join(aspergillosis_prescriptions, gp_practices)
-simd_prescriptions_gp_join <- full_join(prescriptions_gp_join, simd2020)
+prescriptions_gp_join <- left_join(inhaler_prescriptions, gp_practices)
+simd_prescriptions_gp_join <- left_join(prescriptions_gp_join, simd2020)
 # some practices dont have a corresponding datazones - find later
 ```
 
-
+### Figure 1
 ```{r initial plot}
 simd_prescriptions_gp_join %>% 
-  filter() %>% 
+  # SIMD decile is used in analysis as it shows the most variation between groups (rather than quintile0)
+  # where SIMD is known, data cannot be analysed therefore removed
+  filter(simd2020v2country_decile != "NA") %>% 
+  # prescriptions per person is calculated to mitiagte population size differences in gp practices
+  mutate(prescriptions_pp = number_of_paid_items/practice_list_size) %>% 
   group_by(simd2020v2country_decile) %>% 
-  ggplot(aes(x = simd2020v2country_decile, y = number_of_paid_items)) +
+  ggplot(aes(x = simd2020v2country_decile, y = prescriptions_pp, fill = simd2020v2country_decile)) +
   geom_col() +
   labs(
     x = "SIMD Country Decile",
-    y = "Number of Items Dispensed"
-  )+
+    y = "Number of Items Dispensed per Person",
+    title = "Number of Inhaler Prescriptions per Person SIMD group",
+    subtitle = "SIMD is shown on a scale of 1 (most deprived) to 10 (least deprived)",
+    fill = "SIMD"
+  ) +
   theme_minimal()
+
 ```
 
- 
+The results show that there is a general negative trend in number of SIMD to prescriptions per person. This data aligns with our initial argument that living standards could be affecting chronic asthma.
 
+graphs - facet by age group
 
+map - edinburgh heat map for simd and number of 
