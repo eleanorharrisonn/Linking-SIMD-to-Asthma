@@ -88,12 +88,12 @@ simd_prescriptions_gp_join %>%
   mutate(prescriptions_pp = sum(number_of_paid_items)/sum(practice_list_size)) %>% 
   ggplot(aes(x = simd2020v2country_decile, y = prescriptions_pp, fill = simd2020v2country_decile)) +
   geom_col() +
+  guides(fill="none") +
   labs(
     x = "SIMD Country Decile",
     y = "Number of Items Dispensed per Person",
     title = "Number of Inhaler Prescriptions per Person SIMD group",
-    subtitle = "SIMD is shown on a scale of 1 (most deprived) to 10 (least deprived)",
-    fill = "SIMD"
+    subtitle = "SIMD is shown on a scale of 1 (most deprived) to 10 (least deprived)"
   ) +
   theme_minimal()
 
@@ -104,7 +104,7 @@ The results show that there is a general negative trend in number of SIMD to pre
 
 # Personalised Athma Action Plans (PAAPs)
 
-PAAPs are written guides that help patients with Asthma manage their condition with oersonal instructions in how to respond to different situations. These are very helpful for patients with chronic asthma, but they require a lot of time to put together. By assessing which GP practices have the most cases per person, resouces could be better allocated to give more people PAAPs, such as GP and nurse training. 
+PAAPs are written guides that help patients with Asthma manage their condition with personal instructions in how to respond to different situations. These are very helpful for patients with chronic asthma, but they require a lot of time to put together. By assessing which GP practices have the most cases per person, resources could be better allocated to give the most affected people PAAPs, through methods such as increased GP and nurse training. 
 
 
 ```{r}
@@ -116,8 +116,10 @@ simd_prescriptions_gp_join %>%
   select(practice_name, prescriptions_pp_pgp, simd2020v2country_decile) %>%
   gt()
 
+# additional jazz to be added
+
 ```
 
-faults - some gp practices are not representative of simd of communityeg challenging behaviour gp in 9, homeless health and resource services in 4. that doesnt chnage the fact they need paap help.
+faults - some gp practices are not representative of SIMD of community eg challenging behaviour gp in 9, homeless health and resource services in 4. that doesn't change the fact they need PAAP help.
 
-map - edinburgh heat map for simd and number of 
+map - edinburgh heat maps for SIMD and prescriptions per datazone (done by gp location) to visualise similarities in patterns
