@@ -33,31 +33,30 @@ library(dplyr)
 library(knitr)
 library(kableExtra)
 library(here)
+library(gt)
 ```
 
 ### Loading Datasets
 
-```{r loading data}
+```{r loading data, message = FALSE}
 #loading datasets with desired variables selected
 #some variables have been renamed for continuity between datasets
 #clean names also used for continuity
-simd2020 <- read_csv("data/simd2020.csv") %>% 
+simd2020 <- read_csv(here("data/simd2020.csv")) %>% 
   clean_names() %>% 
   select(data_zone, simd2020v2country_decile) %>% 
   mutate(simd2020v2country_decile = as.factor(simd2020v2country_decile))
 
-gp_practices <- read_csv("data/practice_contactdetails_oct2020-open-data.csv") %>% 
+gp_practices <- read_csv(here("data/practice_contactdetails_oct2020-open-data.csv")) %>% 
   rename(practice_name = GPPracticeName) %>% 
   clean_names() %>% 
-  select(practice_code, data_zone, hb, practice_list_size)
+  select(practice_code, data_zone, hb, practice_list_size, practice_name)
 
 #prescriptions data taken from jan-dec 2020, 
 files <- list.files(here("data", "data_2020"), pattern = "csv")
 all_prescriptions_2020 <- files %>% 
   map_dfr(~read_csv(here("data", "data_2020", .)))
-```
 
-```{r filtering}
 # filtering prescriptions for desired drugs and selecting desired columns
 inhaler_prescriptions <- all_prescriptions_2020 %>% 
   rename(HB = HBT) %>%
@@ -67,10 +66,12 @@ inhaler_prescriptions <- all_prescriptions_2020 %>%
   filter(str_detect(bnf_item_description, "SALBUTAMOL|BECLOMETASONE|CICLESONIDE|FLUTICASONE|MOMETASONE"))
 ```
 
+# Initial Analysis
+
 The three datasets used for this analysis (GP practice, SIMD and Prescriptions data) differ by the variables used for location markers therefore cannot be joined by a common factor.
 Therefore SIMD and GP datasets will be joined by data zone, and GP and prescriptions datasets will be joined by practice code (this is under the assumption that the practice is in the datazone). SIMD is hence determined by GP practice location.
 
-```{r joins}
+```{r joins, message = FALSE}
 prescriptions_gp_join <- left_join(inhaler_prescriptions, gp_practices)
 simd_prescriptions_gp_join <- left_join(prescriptions_gp_join, simd2020)
 # some practices dont have a corresponding datazones - find later
@@ -79,12 +80,12 @@ simd_prescriptions_gp_join <- left_join(prescriptions_gp_join, simd2020)
 ### Figure 1
 ```{r initial plot}
 simd_prescriptions_gp_join %>% 
-  # SIMD decile is used in analysis as it shows the most variation between groups (rather than quintile0)
-  # where SIMD is known, data cannot be analysed therefore removed
+  # SIMD decile is used in analysis as it shows the most variation between groups (rather than quintile)
+  # where SIMD is unknown, data cannot be analysed therefore removed
   filter(simd2020v2country_decile != "NA") %>% 
-  # prescriptions per person is calculated to mitiagte population size differences in gp practices
-  mutate(prescriptions_pp = number_of_paid_items/practice_list_size) %>% 
   group_by(simd2020v2country_decile) %>% 
+  # prescriptions per person is calculated to mitiagte population size differences in SIMD groups
+  mutate(prescriptions_pp = sum(number_of_paid_items)/sum(practice_list_size)) %>% 
   ggplot(aes(x = simd2020v2country_decile, y = prescriptions_pp, fill = simd2020v2country_decile)) +
   geom_col() +
   labs(
@@ -98,8 +99,25 @@ simd_prescriptions_gp_join %>%
 
 ```
 
+##### Results 
 The results show that there is a general negative trend in number of SIMD to prescriptions per person. This data aligns with our initial argument that living standards could be affecting chronic asthma.
 
-graphs - facet by age group
+# Personalised Athma Action Plans (PAAPs)
+
+PAAPs are written guides that help patients with Asthma manage their condition with oersonal instructions in how to respond to different situations. These are very helpful for patients with chronic asthma, but they require a lot of time to put together. By assessing which GP practices have the most cases per person, resouces could be better allocated to give more people PAAPs, such as GP and nurse training. 
+
+
+```{r}
+simd_prescriptions_gp_join %>% 
+  group_by(practice_name) %>%
+  summarise(prescriptions_pp_pgp = sum(number_of_paid_items)/max(practice_list_size), simd2020v2country_decile = first(simd2020v2country_decile),
+    .groups = 'drop') %>% 
+  slice_max(prescriptions_pp_pgp, n = 10) %>% 
+  select(practice_name, prescriptions_pp_pgp, simd2020v2country_decile) %>%
+  gt()
+
+```
+
+faults - some gp practices are not representative of simd of communityeg challenging behaviour gp in 9, homeless health and resource services in 4. that doesnt chnage the fact they need paap help.
 
 map - edinburgh heat map for simd and number of 
