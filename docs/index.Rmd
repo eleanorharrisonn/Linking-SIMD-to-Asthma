@@ -1,7 +1,7 @@
 ---
 title: "Assessment"
 author: "Eleanor Harrison"
-date: "2024-11-01"
+date: '`r format(Sys.Date(), "%B %d, %Y")`'
 output: html_document
 ---
 
@@ -19,11 +19,13 @@ This exploratory data analysis will investigate whether living standards have an
 
 The prescriptions assessed are those for salbutamol, beclometasone, ciclesonide, fluticasone and mometasone as they are the most commonly prescribed preventative inhalers (Vincent, 2024)
 
-SIMD data is released every 4 years, the dataset used will be the most recent data from 2020.
+SIMD data is released every 4 years, the dataset used will be the most recent data from 2020 (Public Helath Scotland: https://www.opendata.nhs.scot/dataset/scottish-index-of-multiple-deprivation/resource/acade396-8430-4b34-895a-b3e757fa346e)
 
-Prescriptions data used will be from 2020 to correspond with SIMD year in order to accurateky compare the two.
+Prescriptions data used will be all months from 2020 to correspond with SIMD year in order to accurately compare the two (Public Health Scotland: https://www.opendata.nhs.scot/dataset/prescriptions-in-the-community)
 
 Data will be analysed by datazone as healthboard would be harder to show trends due to large variation in SIMD within them.
+
+Data on GP Practices was also taken from 2020 to ensure datazone areas were up to date (Public Health Scotland: https://www.opendata.nhs.scot/dataset/gp-practice-contact-details-and-list-sizes/resource/42391720-7dcb-48a2-8070-b9d63b246ac6)
 
 ```{r libraries, include=FALSE}
 library(tidyverse)
@@ -34,6 +36,7 @@ library(knitr)
 library(kableExtra)
 library(here)
 library(gt)
+library(sf)
 ```
 
 ### Loading Datasets
@@ -80,23 +83,23 @@ simd_prescriptions_gp_join <- left_join(prescriptions_gp_join, simd2020)
 ### Figure 1
 ```{r initial plot}
 simd_prescriptions_gp_join %>% 
-  # SIMD decile is used in analysis as it shows the most variation between groups (rather than quintile)
-  # where SIMD is unknown, data cannot be analysed therefore removed
-  filter(simd2020v2country_decile != "NA") %>% 
-  group_by(simd2020v2country_decile) %>% 
-  # prescriptions per person is calculated to mitiagte population size differences in SIMD groups
-  mutate(prescriptions_pp = sum(number_of_paid_items)/sum(practice_list_size)) %>% 
-  ggplot(aes(x = simd2020v2country_decile, y = prescriptions_pp, fill = simd2020v2country_decile)) +
-  geom_col() +
+# where SIMD is unknown, data cannot be analysed therefore removed
+# Homeless Health and Resource Services was an outlier, it is not representative of the SIMD of patients and was therefore removed
+  filter(simd2020v2country_decile != "NA", practice_name != "Homeless Health & Resource Services") %>% 
+  group_by(practice_name) %>%
+  summarise(prescriptions_pp_pgp = sum(number_of_paid_items)/max(practice_list_size), simd2020v2country_decile = first(simd2020v2country_decile),
+    .groups = 'drop') %>% 
+# SIMD decile is used in analysis as it shows the most variation between groups (rather than quintile)
+  ggplot(aes(x = simd2020v2country_decile, y = prescriptions_pp_pgp, fill = simd2020v2country_decile)) +
+  geom_boxplot() +
   guides(fill="none") +
   labs(
     x = "SIMD Country Decile",
-    y = "Number of Items Dispensed per Person",
-    title = "Number of Inhaler Prescriptions per Person SIMD group",
+    y = "Number of Items Dispensed per Person per GP Practice",
+    title = "Number of Inhaler Prescriptions per Person per SIMD group",
     subtitle = "SIMD is shown on a scale of 1 (most deprived) to 10 (least deprived)"
   ) +
   theme_minimal()
-
 ```
 
 ##### Results 
@@ -114,12 +117,34 @@ simd_prescriptions_gp_join %>%
     .groups = 'drop') %>% 
   slice_max(prescriptions_pp_pgp, n = 10) %>% 
   select(practice_name, prescriptions_pp_pgp, simd2020v2country_decile) %>%
-  gt()
-
-# additional jazz to be added
+  gt() %>% 
+  tab_header(title ="Top 10 GP Practices with the Highest Prescription Rates for Prventative Inhalers in Scotland", 
+             subtitle = "Data from Public Health Scotland (2020)") %>% 
+  cols_label(practice_name = "Practice Name",
+             prescriptions_pp_pgp = "Prescriptions Per Person",
+             simd2020v2country_decile = "SIMD") %>% 
+    cols_align(align = "center",
+             columns = c(prescriptions_pp_pgp, simd2020v2country_decile)) %>% 
+  fmt_number(columns = prescriptions_pp_pgp, decimals = 2) 
 
 ```
 
 faults - some gp practices are not representative of SIMD of community eg challenging behaviour gp in 9, homeless health and resource services in 4. that doesn't change the fact they need PAAP help.
 
 map - edinburgh heat maps for SIMD and prescriptions per datazone (done by gp location) to visualise similarities in patterns
+
+```{r}
+datazones_2011 <- st_read(here("data", "SG_DataZone_Bdry_2011.shp")) %>% 
+  clean_names()
+
+datazones_2024 <- 
+
+gp_simd_datazones <- left_join(datazones, simd_prescriptions_gp_join)
+
+gp_simd_datazones %>% 
+  group_by(data_zone) 
+  
+ggplot(aes(fill = simd2020v2country_decile)) +
+  geom_sf()
+```
+
