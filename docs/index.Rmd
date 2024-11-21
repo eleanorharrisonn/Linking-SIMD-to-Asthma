@@ -2,7 +2,10 @@
 title: "Assessment"
 author: "Eleanor Harrison"
 date: '`r format(Sys.Date(), "%B %d, %Y")`'
-output: html_document
+output: 
+  html_document:
+    toc: true
+    toc_float: true
 ---
 
 ```{r setup, include=FALSE}
@@ -15,11 +18,11 @@ Asthma is a common condition worldwide that can be caused by prolonged indoor ex
 
 This exploratory data analysis will investigate whether living standards have an impact on the prevalence of chronic asthma. To do this, living standards will be defined by SIMD due to the associatioon of social housing with mould, and prevalence of chronic asthma will be measured by the number of prescriptions of common preventer inhalers as these are often prescribed when long or short acting bronchodilators are ineffective, suggesting severe chronic asthma.
 
-## Data chosen for Analysis
+### Data chosen for Analysis
 
 The prescriptions assessed are those for salbutamol, beclometasone, ciclesonide, fluticasone and mometasone as they are the most commonly prescribed preventative inhalers (Vincent, 2024)
 
-SIMD data is released every 4 years, the dataset used will be the most recent data from 2020 (Public Helath Scotland: https://www.opendata.nhs.scot/dataset/scottish-index-of-multiple-deprivation/resource/acade396-8430-4b34-895a-b3e757fa346e)
+SIMD data is released every 4 years, the dataset used will be the most recent data from 2020 (Public Health Scotland: https://www.opendata.nhs.scot/dataset/scottish-index-of-multiple-deprivation/resource/acade396-8430-4b34-895a-b3e757fa346e)
 
 Prescriptions data used will be all months from 2020 to correspond with SIMD year in order to accurately compare the two (Public Health Scotland: https://www.opendata.nhs.scot/dataset/prescriptions-in-the-community)
 
@@ -53,7 +56,7 @@ simd2020 <- read_csv(here("data/simd2020.csv")) %>%
 gp_practices <- read_csv(here("data/practice_contactdetails_oct2020-open-data.csv")) %>% 
   rename(practice_name = GPPracticeName) %>% 
   clean_names() %>% 
-  select(practice_code, data_zone, hb, practice_list_size, practice_name)
+  select(practice_code, data_zone, hb, practice_list_size, practice_name, gp_cluster, postcode, hb)
 
 #prescriptions data taken from jan-dec 2020, 
 files <- list.files(here("data", "data_2020"), pattern = "csv")
@@ -69,27 +72,29 @@ inhaler_prescriptions <- all_prescriptions_2020 %>%
   filter(str_detect(bnf_item_description, "SALBUTAMOL|BECLOMETASONE|CICLESONIDE|FLUTICASONE|MOMETASONE"))
 ```
 
-# Initial Analysis
+# Comparison of Prescriptions per GP Practice
 
 The three datasets used for this analysis (GP practice, SIMD and Prescriptions data) differ by the variables used for location markers therefore cannot be joined by a common factor.
-Therefore SIMD and GP datasets will be joined by data zone, and GP and prescriptions datasets will be joined by practice code (this is under the assumption that the practice is in the datazone). SIMD is hence determined by GP practice location.
+Therefore SIMD and GP datasets will be joined by data zone, and GP and prescriptions datasets will be joined by practice code (this is under the assumption that the practice is in the datazone). The SIMDs of the populations analysed are hence determined by the location of the GP practice that they are patients of. Residuals represent the number of prescriptions per person per GP Practice.
 
 ```{r joins, message = FALSE}
 prescriptions_gp_join <- left_join(inhaler_prescriptions, gp_practices)
-simd_prescriptions_gp_join <- left_join(prescriptions_gp_join, simd2020)
-# some practices dont have a corresponding datazones - find later
-```
+simd_prescriptions_gp_join <- full_join(prescriptions_gp_join, simd2020) 
 
-### Figure 1
-```{r initial plot}
-simd_prescriptions_gp_join %>% 
-# where SIMD is unknown, data cannot be analysed therefore removed
-# Homeless Health and Resource Services was an outlier in SIMD group 4, it is not representative of the SIMD of patients and was therefore removed
-  filter(simd2020v2country_decile != "NA", practice_name != "Homeless Health & Resource Services") %>% 
+# new variable is created calculating the number of combined prescriptions per person per gp practice to use are a comparative variable in analysis
+prescriptions_pp_analysis <-  simd_prescriptions_gp_join %>% 
   group_by(practice_name) %>%
   summarise(prescriptions_pp_pgp = sum(number_of_paid_items)/max(practice_list_size), simd2020v2country_decile = first(simd2020v2country_decile),
-    .groups = 'drop') %>% 
-# SIMD decile is used in analysis as it shows the most variation between groups (rather than quintile)
+    .groups = 'drop')
+```
+
+## Figure 1
+```{r initial plot}
+prescriptions_pp_analysis %>% 
+# Some practice codes are dummy practice codestherefore don't have an associated with SIMD. Data therefore cannot be analysed so is removed removed
+# Homeless Health and Resource Services was an outlier in SIMD group 4, it is not representative of the SIMD of patients and was therefore removed
+  filter(simd2020v2country_decile != "NA", practice_name != "Homeless Health & Resource Services") %>% 
+# SIMD decile is used in analysis as it shows the most variation between groups (rather than quintile) so patterns will be easier to visualise
   ggplot(aes(x = simd2020v2country_decile, y = prescriptions_pp_pgp, fill = simd2020v2country_decile)) +
   geom_boxplot() +
   guides(fill="none") +
@@ -97,24 +102,21 @@ simd_prescriptions_gp_join %>%
     x = "SIMD Country Decile",
     y = "Number of Items Dispensed per Person per GP Practice",
     title = "Boxplot showing the correlation of SIMD to Inhaler Prescriptions",
-    subtitle = "SIMD is shown on a scale of 1 (most deprived) to 10 (least deprived)"
+    subtitle = "SIMD is shown on a scale of 1 (most deprived) to 10 (least deprived)",
+    caption = "Residuals represent the number of prescriptions per person per GP Practice"
   ) +
-  theme_minimal()
+  theme_minimal(base_size = 13)
 ```
 
-##### Results 
-The boxplot shows that there is a general negative trend in number of SIMD to prescriptions per person. This data aligns with our initial argument that living standards could be affecting chronic asthma. 
+Figure 1 shows that there is a general negative trend in SIMD to number of prescriptions per person. This data aligns with our initial argument that living standards could be affecting chronic asthma. 
 
-# Personalised Athma Action Plans (PAAPs)
+# Personalised Athma Action Plan (PAAP) Resource Implementation
 
 PAAPs are written guides that help patients with Asthma manage their condition with personal instructions in how to respond to different situations. These are very helpful for patients with chronic asthma, but they require a lot of time to put together. By assessing which GP practices have the most cases per person, resources could be better allocated to give the most affected people PAAPs, through methods such as increased GP and nurse training. 
 
-
+## Figure 2
 ```{r}
-simd_prescriptions_gp_join %>% 
-  group_by(practice_name) %>%
-  summarise(prescriptions_pp_pgp = sum(number_of_paid_items)/max(practice_list_size), simd2020v2country_decile = first(simd2020v2country_decile),
-    .groups = 'drop') %>% 
+prescriptions_pp_analysis %>% 
   slice_max(prescriptions_pp_pgp, n = 10) %>% 
   select(practice_name, prescriptions_pp_pgp, simd2020v2country_decile) %>%
   gt() %>% 
@@ -127,27 +129,93 @@ simd_prescriptions_gp_join %>%
              columns = c(prescriptions_pp_pgp, simd2020v2country_decile)) %>% 
   fmt_number(columns = prescriptions_pp_pgp, decimals = 2) %>% 
   tab_style(
-    style = cell_fill(color = "#FF8D6C"),
+    style = cell_fill(color = "#FFBBA7"),
     locations = cells_body(
       rows = practice_name %in% c("Homeless Health & Resource Services",
                                   "Challenging Behaviour General Practice"))
   )
 ```
 
-faults - some gp practices are not representative of SIMD of community eg challenging behaviour gp in 9, homeless health and resource services in 4. that doesn't change the fact they need PAAP help.
+Figure 2 highlights the top 10 GP Practices in Scotland with the most prescriptions for inhalers per person, therefore these practices would likely benefit the most from increased PAAP resource allocation.
 
-map - edinburgh heat maps for SIMD and prescriptions per datazone (done by gp location) to visualise similarities in patterns
 
 ```{r, message = FALSE}
-#datazones_2011 <- st_read(here("data", "SG_DataZone_Bdry_2011.shp")) %>% 
-  #clean_names()
+# reading gp gractice location shapefile
+gp_practice_shp <- st_read(here("data", "pub_gpprac.shp")) %>% 
+  clean_names() %>% 
+  select(postcode, geometry)
 
-#gp_simd_datazones <- left_join(datazones_2011, simd_prescriptions_gp_join)
+#extracting postcodes as common factor between datasets
+gp_postcodes <- gp_practices %>% 
+  select(practice_name, postcode, gp_cluster, hb)
 
-#gp_simd_datazones %>% 
-  #group_by(data_zone) 
+#giving each gp practice its postcode
+gp_simd_postcodes <- full_join(prescriptions_pp_analysis, gp_postcodes)
+
+#combibining data with shapefile
+gp_simd_point_shp <- left_join(gp_practice_shp, gp_simd_postcodes, relationship = "many-to-many")
+gp_simd_shp %>% 
+  group_by(gp_cluster) %>% 
+  ggplot(aes(colour = simd2020v2country_decile)) +
+  geom_sf() 
+
+
+
+
+
+
+healthboard_shp <- st_read(here("data", "NHS_healthboards_2019.shp")) %>% 
+  clean_names() %>% 
+  rename(hb = hb_code)
+
+healthboard_summary <- gp_simd_postcodes %>% 
+    group_by(hb) %>% 
+  summarise(prescriptions_pp_phb = mean(prescriptions_pp_pgp), simd2020v2country_decile = first(simd2020v2country_decile))
+
+healthboard_analysis_shp <- full_join(healthboard_summary, healthboard_shp)
+
+
+
+ggplot() +
+  geom_sf(data = healthboard_analysis_shp, aes(fill = prescriptions_pp_phb, geometry = geometry), color = "black", size = 0.1) +
+  geom_sf(data = gp_simd_point_shp, aes(colour = simd2020v2country_decile, geometry = geometry)) +
+  scale_fill_viridis_c(option = "plasma", name = "Prescriptions per Person") +
+    labs(
+    title = "Overlay of Health Boards and Point Data",
+    subtitle = "Visualizing health board polygons with prescription points",
+    caption = "Source: Public Health Scotland 2020"
+  ) +
+  theme_minimal()
   
-#ggplot(aes(fill = simd2020v2country_decile)) +
-  #geom_sf() 
+
+
+
+
+
+
 ```
 
+
+Heat map
+group by healthboard or hspc- highlight msot in need
+
+
+# Discussion
+
+## Limitations
+Figure 2 highlights the main flaw in this analysis; not every GP practice is representative of their patients' SIMD status, highlighted by the rows in orange. This is logical as only areas with sufficient resources in excess can care for deprived populations, such as those that are homeless. However, this does not change the fact that those particular GP Practices would require more aid in giving out PAAPs to their patients. Furthermore, because of the defined catchment areas of most GP Practices, this flaw likely only affects a small number of practices, which does not significantly affect the rest of the analysis. This is corroborated as only one datapoint was removed for analysis in Figure 1 and results were still conclusive. 
+
+# References
+
+Douglas, A.P., Smibert, Olivia.C., Bajel, A., Halliday, C.L., Lavee, O., McMullan, B., Yong, M.K., Hal, S.J., Chen, S.C. ‐A., Slavin, M.A., Thursky, K.A., Roberts, J.A., Worth, L.J., Chang, C.C., Chen, S.C., Morrissey, C.O., Blyth, C.C. and Khanina, A. (2021). Consensus guidelines for the diagnosis and management of invasive aspergillosis, 2021. Internal Medicine Journal, 51(S7), pp.143–176. doi:https://doi.org/10.1111/imj.15591.
+
+Mousavi, B. (2016). Aspergillus species in indoor environments and their possible occupational and public health hazards. Current Medical Mycology, 2(1), pp.36–42. doi:https://doi.org/10.18869/acadpub.cmm.2.1.36.
+
+The Scottish Parliament (2023). Local Government, Housing and Planning Committee: Damp and Mould in Social and Private Rented Housing. [online] The Scottish Parliament. Available at: https://www.parliament.scot/api/sitecore/CustomMedia/OfficialReport?meetingId=15285
+
+.Vincent, P. (2024). Asthma Inhalers. [online] Patient.info. Available at: https://patient.info/chest-lungs/asthma-leaflet/asthma-inhalers.
+
+World Health Organization (2024). Asthma. [online] World Health Organisation. Available at: https://www.who.int/news-room/fact-sheets/detail/asthma.
+
+#### Generative AI Disclaimer
+Generative AI has been used in this project for troubleshooting errors in code only
