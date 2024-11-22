@@ -11,6 +11,7 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+# Assessing the relationship between living standards and chronic asthma
 
 # Introduction
 
@@ -104,6 +105,7 @@ prescriptions_pp_analysis %>%
 # SIMD decile is used in analysis as it shows the most variation between groups (rather than quintile) so patterns will be easier to visualise
   ggplot(aes(x = simd2020v2country_decile, y = prescriptions_pp_pgp, fill = simd2020v2country_decile)) +
   geom_boxplot() +
+  scale_fill_manual(values = c("1" = "#820202", "2" = "#981313", "3" = "#B71D1D", "4" = "#CC3939", "5" = "#DD6262", "6" = "#E27E7E", "7" = "#E79797", "8" = "#EBB3B3", "9" = "#EBB3B3", "10" = "#F3DBD8" )) +
   guides(fill="none") +
   labs(
     x = "SIMD Country Decile",
@@ -126,7 +128,7 @@ In order to evaluate this relationship more closely, we can analyse data on a ge
 
 ```{r loading map data, message=FALSE}
 # reading gp gractice location shapefile
-gp_practice_shp <- st_read(here("data", "pub_gpprac.shp")) %>% 
+gp_practice_shp <- st_read(here("data", "pub_gpprac.shp"), quiet = TRUE) %>% 
   clean_names() %>% 
   select(postcode, geometry)
 
@@ -142,17 +144,17 @@ gp_simd_point_shp <- left_join(gp_practice_shp, gp_simd_postcodes, relationship 
   filter(!is.na(simd2020v2country_decile))
 
 #reading healthboard file and changing variable names for continuity
-healthboard_shp <- st_read(here("data", "SG_NHS_HealthBoards_2019.shp")) %>% 
+healthboard_shp <- st_read(here("data", "NHS_healthboards_2019.shp"), quiet = TRUE) %>% 
   clean_names() %>% 
   rename(hb = hb_code)
 
 #creating a summary of prescriptions per healthboard 
 healthboard_summary <- gp_simd_postcodes %>% 
     group_by(hb) %>% 
-  summarise(prescriptions_pp_phb = mean(prescriptions_pp_pgp), simd2020v2country_decile = first(simd2020v2country_decile))
+  summarise(prescriptions_pp_phb = mean(prescriptions_pp_pgp, na.rm = TRUE), simd2020v2country_decile = first(simd2020v2country_decile))
 
 #joining summary data with shapefile
-healthboard_analysis_shp <- full_join(healthboard_summary, healthboard_shp)
+healthboard_analysis_shp <- full_join(healthboard_summary, healthboard_shp) 
 
 ```
 
@@ -165,7 +167,7 @@ ggplot() +
                                            color = as.numeric(simd2020v2country_decile)), 
              size = 0.5) +
   scale_fill_distiller(name = "Average Prescriptions") +
-  scale_color_gradient(low = "#D20B0B",
+  scale_color_gradient(low = "#B81010",
                        high = "#F3DBD8",
                        name = "SIMD Decile") +
     labs(
@@ -185,7 +187,7 @@ ggplot() +
   )
 ```
 
-Healthboards with higher average precriptions (EG) appear to have a a high number of GP Practices with a high SIMD. Additonally, healthboard with a lower averahge number of presctiptions (EG) have a significant number of GP Practices with a lower SIMD score. Along with the previous findings in Figure 1, this would suggest that SIMD is affecting the number of prescriptions for preventative inhalers on a smaller geographical level. This would be logical as even neighboring datazones can have drastically different SIMD scores. Together, this indicates that individual living standards really could be having a significant impact on the prevalence chronic asthma.
+Health boards with higher average prescriptions (EG) appear to have a a high number of GP Practices with a high SIMD. Additionally, health board with a lower average number of prescriptions (EG) have a significant number of GP Practices with a lower SIMD score. Along with the previous findings in Figure 1, this would suggest that SIMD is affecting the number of prescriptions for preventative inhalers on a smaller geographical level. This would be logical as even neighboring data zones can have drastically different SIMD scores. Together, this indicates that individual living standards really could be having a significant impact on the prevalence chronic asthma.
 
 # Personalised Athma Action Plan (PAAP) Resource Implementation
 
