@@ -1,9 +1,10 @@
 ---
 title: "Assessment"
 author: "Eleanor Harrison"
-date: "`r Sys.Date()`"
+date: "`r format(Sys.time(), '%B %d %Y')`"
 output:
-  html_document:
+  html_document: 
+    theme: cosmo
     toc: true
     toc_float: true
 ---
@@ -15,9 +16,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Introduction
 
-Asthma is a common condition worldwide that can be caused by prolonged indoor exposure to mould (World Health Organization, 2024). Currently, there is a lack of accurate data on the prevalence of mould in social housing, potentially making this association more serious than expected (The Scottish Parliament, 2023).
+Asthma is a common condition worldwide that can be caused by prolonged indoor exposure to mold (World Health Organization, 2024; Mousavi, 2016). Currently, there is a lack of accurate data on the prevalence of mold in social housing, potentially making this association more serious than expected (The Scottish Parliament, 2023).
 
-This exploratory data analysis will investigate whether living standards could have an impact on the prevalence of chronic asthma. To do this, living standards will be defined by SIMD due to the association of social housing with mould, and prevalence of chronic asthma will be measured by the number of prescriptions of drugs used in common preventer inhalers as these are often prescribed when long or short acting bronchodilators are ineffective, suggesting severe chronic asthma.
+This exploratory data analysis will investigate whether living standards could have an impact on the prevalence of chronic asthma. To do this, living standards will be defined by SIMD due to the association of social housing with mold, and prevalence of chronic asthma will be measured by the number of prescriptions of drugs used in common preventer inhalers as these are often prescribed when long or short acting bronchodilators are ineffective, suggesting severe chronic asthma.
 
 ### Data chosen for Analysis
 
@@ -235,8 +236,6 @@ Perhaps the most important limitation is the assumption that SIMD is directly co
 
 
 # References
-
-Douglas, A.P., Smibert, Olivia.C., Bajel, A., Halliday, C.L., Lavee, O., McMullan, B., Yong, M.K., Hal, S.J., Chen, S.C. ‐A., Slavin, M.A., Thursky, K.A., Roberts, J.A., Worth, L.J., Chang, C.C., Chen, S.C., Morrissey, C.O., Blyth, C.C. and Khanina, A. (2021). Consensus guidelines for the diagnosis and management of invasive aspergillosis, 2021. Internal Medicine Journal, 51(S7), pp.143–176. <doi:https://doi.org/10.1111/imj.15591>.
 
 Mousavi, B. (2016). Aspergillus species in indoor environments and their possible occupational and public health hazards. Current Medical Mycology, 2(1), pp.36–42. <doi:https://doi.org/10.18869/acadpub.cmm.2.1.36>.
 
