@@ -11,9 +11,8 @@
 
 <meta name="author" content="Eleanor Harrison" />
 
-<meta name="date" content="2024-11-22" />
 
-<title>Assessment</title>
+<title>Assessing the relationship between living standards and chronic asthma</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -1497,17 +1496,14 @@ border-radius: 0px;
 
 
 
-<h1 class="title toc-ignore">Assessment</h1>
+<h1 class="title toc-ignore">Assessing the relationship between living
+standards and chronic asthma</h1>
 <h4 class="author">Eleanor Harrison</h4>
-<h4 class="date">22 November 2024</h4>
+<h4 class="date">November 22 2024</h4>
 
 </div>
 
 
-<div id="assessing-the-relationship-between-living-standards-and-chronic-asthma" class="section level1">
-<h1>Assessing the relationship between living standards and chronic
-asthma</h1>
-</div>
 <div id="introduction" class="section level1">
 <h1>Introduction</h1>
 <p>Asthma is a common condition worldwide that can be caused by
@@ -1524,8 +1520,8 @@ measured by the number of prescriptions of drugs used in common
 preventer inhalers as these are often prescribed when long or short
 acting bronchodilators are ineffective, suggesting severe chronic
 asthma.</p>
-<div id="data-chosen-for-analysis" class="section level3">
-<h3>Data chosen for Analysis</h3>
+<div id="data-chosen-for-analysis" class="section level2">
+<h2>Data chosen for Analysis</h2>
 <p><strong>SIMD</strong></p>
 <p>SIMD Data is released every 4 years, the dataset used will be the
 most recent data from 2020 (Public Health Scotland: <a href="https://www.opendata.nhs.scot/dataset/scottish-index-of-multiple-deprivation/resource/acade396-8430-4b34-895a-b3e757fa346e" class="uri">https://www.opendata.nhs.scot/dataset/scottish-index-of-multiple-deprivation/resource/acade396-8430-4b34-895a-b3e757fa346e</a>)</p>
@@ -1544,8 +1540,8 @@ locations updated as of 2020 (<a href="https://data.spatialhub.scot/dataset/gp_p
 <p>GP Practice Healthboard Shapefile was extracted from
 spatialdata.gov.scot (<a href="https://spatialdata.gov.scot/geonetwork/srv/eng/catalog.search#/metadata/f12c3826-4b4b-40e6-bf4f-77b9ed01dc14" class="uri">https://spatialdata.gov.scot/geonetwork/srv/eng/catalog.search#/metadata/f12c3826-4b4b-40e6-bf4f-77b9ed01dc14</a>)</p>
 </div>
-<div id="loading-datasets" class="section level3">
-<h3>Loading Datasets</h3>
+<div id="loading-datasets" class="section level2">
+<h2>Loading Datasets</h2>
 <pre class="r"><code>#loading datasets with desired variables selected
 #some variables have been renamed for continuity between datasets
 #clean names also used for continuity
@@ -1592,8 +1588,8 @@ prescriptions_pp_analysis &lt;-  simd_prescriptions_gp_join %&gt;%
   group_by(practice_name) %&gt;%
   summarise(prescriptions_pp_pgp = sum(number_of_paid_items)/max(practice_list_size), simd2020v2country_decile = first(simd2020v2country_decile), gp_cluster = first(gp_cluster),
     .groups = &#39;drop&#39;)</code></pre>
-<div id="figure-1" class="section level2">
-<h2>Figure 1</h2>
+<div id="figure-1" class="section level3">
+<h3>Figure 1</h3>
 <pre class="r"><code>prescriptions_pp_analysis %&gt;% 
 # Some practice codes are dummy practice codes, therefore don&#39;t have an associated with SIMD. Data therefore cannot be analysed so is removed removed
 # Homeless Health and Resource Services was an outlier in SIMD group 4, it is not representative of the SIMD of patients and was therefore removed
@@ -1626,8 +1622,8 @@ data on a geographical level. Qualitative analysis can be done to assess
 the average number of prescriptions per healthboard whilst looking at
 the SIMD of individual GP practices within them. This is shown in Figure
 2.</p>
-<div id="figure-2" class="section level2">
-<h2>Figure 2</h2>
+<div id="figure-2" class="section level3">
+<h3>Figure 2</h3>
 <pre class="r"><code># reading gp gractice location shapefile
 gp_practice_shp &lt;- st_read(here(&quot;data&quot;, &quot;pub_gpprac.shp&quot;), quiet = TRUE) %&gt;% 
   clean_names() %&gt;% 
@@ -1695,8 +1691,8 @@ indicates that individual living standards really could be having a
 significant impact on the prevalence chronic asthma.</p>
 </div>
 </div>
-<div id="personalised-athma-action-plan-paap-resource-implementation" class="section level1">
-<h1>Personalised Athma Action Plan (PAAP) Resource Implementation</h1>
+<div id="personalised-asthma-action-plan-paap-resource-implementation" class="section level1">
+<h1>Personalised Asthma Action Plan (PAAP) Resource Implementation</h1>
 <p>PAAPs are written guides that help patients with Asthma manage their
 condition with personal instructions in how to respond to different
 situations. These are very helpful for patients with chronic asthma, but
@@ -1704,8 +1700,8 @@ they require a lot of time to put together. By assessing which GP
 practices have the most cases per person, resources could be better
 allocated to give the most affected people PAAPs, through methods such
 as increased GP and nurse training.</p>
-<div id="figure-3" class="section level2">
-<h2>Figure 3</h2>
+<div id="figure-3" class="section level3">
+<h3>Figure 3</h3>
 <pre class="r"><code>prescriptions_pp_analysis %&gt;% 
   slice_max(prescriptions_pp_pgp, n = 10) %&gt;% 
   select(practice_name, gp_cluster, prescriptions_pp_pgp, simd2020v2country_decile) %&gt;%
@@ -1726,20 +1722,20 @@ as increased GP and nurse training.</p>
                                   &quot;Challenging Behaviour General Practice&quot;,
                                   &quot;Challenging Behaviour Practice&quot;))
   )</code></pre>
-<div id="hukwltixtq" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#hukwltixtq table {
+<div id="pnqizbhooh" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#pnqizbhooh table {
 font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 -webkit-font-smoothing: antialiased;
 -moz-osx-font-smoothing: grayscale;
 }
-#hukwltixtq thead, #hukwltixtq tbody, #hukwltixtq tfoot, #hukwltixtq tr, #hukwltixtq td, #hukwltixtq th {
+#pnqizbhooh thead, #pnqizbhooh tbody, #pnqizbhooh tfoot, #pnqizbhooh tr, #pnqizbhooh td, #pnqizbhooh th {
 border-style: none;
 }
-#hukwltixtq p {
+#pnqizbhooh p {
 margin: 0;
 padding: 0;
 }
-#hukwltixtq .gt_table {
+#pnqizbhooh .gt_table {
 display: table;
 border-collapse: collapse;
 line-height: normal;
@@ -1764,11 +1760,11 @@ border-left-style: none;
 border-left-width: 2px;
 border-left-color: #D3D3D3;
 }
-#hukwltixtq .gt_caption {
+#pnqizbhooh .gt_caption {
 padding-top: 4px;
 padding-bottom: 4px;
 }
-#hukwltixtq .gt_title {
+#pnqizbhooh .gt_title {
 color: #333333;
 font-size: 125%;
 font-weight: initial;
@@ -1779,7 +1775,7 @@ padding-right: 5px;
 border-bottom-color: #FFFFFF;
 border-bottom-width: 0;
 }
-#hukwltixtq .gt_subtitle {
+#pnqizbhooh .gt_subtitle {
 color: #333333;
 font-size: 85%;
 font-weight: initial;
@@ -1790,7 +1786,7 @@ padding-right: 5px;
 border-top-color: #FFFFFF;
 border-top-width: 0;
 }
-#hukwltixtq .gt_heading {
+#pnqizbhooh .gt_heading {
 background-color: #FFFFFF;
 text-align: center;
 border-bottom-color: #FFFFFF;
@@ -1801,12 +1797,12 @@ border-right-style: none;
 border-right-width: 1px;
 border-right-color: #D3D3D3;
 }
-#hukwltixtq .gt_bottom_border {
+#pnqizbhooh .gt_bottom_border {
 border-bottom-style: solid;
 border-bottom-width: 2px;
 border-bottom-color: #D3D3D3;
 }
-#hukwltixtq .gt_col_headings {
+#pnqizbhooh .gt_col_headings {
 border-top-style: solid;
 border-top-width: 2px;
 border-top-color: #D3D3D3;
@@ -1820,7 +1816,7 @@ border-right-style: none;
 border-right-width: 1px;
 border-right-color: #D3D3D3;
 }
-#hukwltixtq .gt_col_heading {
+#pnqizbhooh .gt_col_heading {
 color: #333333;
 background-color: #FFFFFF;
 font-size: 100%;
@@ -1839,7 +1835,7 @@ padding-left: 5px;
 padding-right: 5px;
 overflow-x: hidden;
 }
-#hukwltixtq .gt_column_spanner_outer {
+#pnqizbhooh .gt_column_spanner_outer {
 color: #333333;
 background-color: #FFFFFF;
 font-size: 100%;
@@ -1850,13 +1846,13 @@ padding-bottom: 0;
 padding-left: 4px;
 padding-right: 4px;
 }
-#hukwltixtq .gt_column_spanner_outer:first-child {
+#pnqizbhooh .gt_column_spanner_outer:first-child {
 padding-left: 0;
 }
-#hukwltixtq .gt_column_spanner_outer:last-child {
+#pnqizbhooh .gt_column_spanner_outer:last-child {
 padding-right: 0;
 }
-#hukwltixtq .gt_column_spanner {
+#pnqizbhooh .gt_column_spanner {
 border-bottom-style: solid;
 border-bottom-width: 2px;
 border-bottom-color: #D3D3D3;
@@ -1867,10 +1863,10 @@ overflow-x: hidden;
 display: inline-block;
 width: 100%;
 }
-#hukwltixtq .gt_spanner_row {
+#pnqizbhooh .gt_spanner_row {
 border-bottom-style: hidden;
 }
-#hukwltixtq .gt_group_heading {
+#pnqizbhooh .gt_group_heading {
 padding-top: 8px;
 padding-bottom: 8px;
 padding-left: 5px;
@@ -1895,7 +1891,7 @@ border-right-color: #D3D3D3;
 vertical-align: middle;
 text-align: left;
 }
-#hukwltixtq .gt_empty_group_heading {
+#pnqizbhooh .gt_empty_group_heading {
 padding: 0.5px;
 color: #333333;
 background-color: #FFFFFF;
@@ -1909,13 +1905,13 @@ border-bottom-width: 2px;
 border-bottom-color: #D3D3D3;
 vertical-align: middle;
 }
-#hukwltixtq .gt_from_md > :first-child {
+#pnqizbhooh .gt_from_md > :first-child {
 margin-top: 0;
 }
-#hukwltixtq .gt_from_md > :last-child {
+#pnqizbhooh .gt_from_md > :last-child {
 margin-bottom: 0;
 }
-#hukwltixtq .gt_row {
+#pnqizbhooh .gt_row {
 padding-top: 8px;
 padding-bottom: 8px;
 padding-left: 5px;
@@ -1933,7 +1929,7 @@ border-right-color: #D3D3D3;
 vertical-align: middle;
 overflow-x: hidden;
 }
-#hukwltixtq .gt_stub {
+#pnqizbhooh .gt_stub {
 color: #333333;
 background-color: #FFFFFF;
 font-size: 100%;
@@ -1945,7 +1941,7 @@ border-right-color: #D3D3D3;
 padding-left: 5px;
 padding-right: 5px;
 }
-#hukwltixtq .gt_stub_row_group {
+#pnqizbhooh .gt_stub_row_group {
 color: #333333;
 background-color: #FFFFFF;
 font-size: 100%;
@@ -1958,13 +1954,13 @@ padding-left: 5px;
 padding-right: 5px;
 vertical-align: top;
 }
-#hukwltixtq .gt_row_group_first td {
+#pnqizbhooh .gt_row_group_first td {
 border-top-width: 2px;
 }
-#hukwltixtq .gt_row_group_first th {
+#pnqizbhooh .gt_row_group_first th {
 border-top-width: 2px;
 }
-#hukwltixtq .gt_summary_row {
+#pnqizbhooh .gt_summary_row {
 color: #333333;
 background-color: #FFFFFF;
 text-transform: inherit;
@@ -1973,14 +1969,14 @@ padding-bottom: 8px;
 padding-left: 5px;
 padding-right: 5px;
 }
-#hukwltixtq .gt_first_summary_row {
+#pnqizbhooh .gt_first_summary_row {
 border-top-style: solid;
 border-top-color: #D3D3D3;
 }
-#hukwltixtq .gt_first_summary_row.thick {
+#pnqizbhooh .gt_first_summary_row.thick {
 border-top-width: 2px;
 }
-#hukwltixtq .gt_last_summary_row {
+#pnqizbhooh .gt_last_summary_row {
 padding-top: 8px;
 padding-bottom: 8px;
 padding-left: 5px;
@@ -1989,7 +1985,7 @@ border-bottom-style: solid;
 border-bottom-width: 2px;
 border-bottom-color: #D3D3D3;
 }
-#hukwltixtq .gt_grand_summary_row {
+#pnqizbhooh .gt_grand_summary_row {
 color: #333333;
 background-color: #FFFFFF;
 text-transform: inherit;
@@ -1998,7 +1994,7 @@ padding-bottom: 8px;
 padding-left: 5px;
 padding-right: 5px;
 }
-#hukwltixtq .gt_first_grand_summary_row {
+#pnqizbhooh .gt_first_grand_summary_row {
 padding-top: 8px;
 padding-bottom: 8px;
 padding-left: 5px;
@@ -2007,7 +2003,7 @@ border-top-style: double;
 border-top-width: 6px;
 border-top-color: #D3D3D3;
 }
-#hukwltixtq .gt_last_grand_summary_row_top {
+#pnqizbhooh .gt_last_grand_summary_row_top {
 padding-top: 8px;
 padding-bottom: 8px;
 padding-left: 5px;
@@ -2016,10 +2012,10 @@ border-bottom-style: double;
 border-bottom-width: 6px;
 border-bottom-color: #D3D3D3;
 }
-#hukwltixtq .gt_striped {
+#pnqizbhooh .gt_striped {
 background-color: rgba(128, 128, 128, 0.05);
 }
-#hukwltixtq .gt_table_body {
+#pnqizbhooh .gt_table_body {
 border-top-style: solid;
 border-top-width: 2px;
 border-top-color: #D3D3D3;
@@ -2027,7 +2023,7 @@ border-bottom-style: solid;
 border-bottom-width: 2px;
 border-bottom-color: #D3D3D3;
 }
-#hukwltixtq .gt_footnotes {
+#pnqizbhooh .gt_footnotes {
 color: #333333;
 background-color: #FFFFFF;
 border-bottom-style: none;
@@ -2040,7 +2036,7 @@ border-right-style: none;
 border-right-width: 2px;
 border-right-color: #D3D3D3;
 }
-#hukwltixtq .gt_footnote {
+#pnqizbhooh .gt_footnote {
 margin: 0px;
 font-size: 90%;
 padding-top: 4px;
@@ -2048,7 +2044,7 @@ padding-bottom: 4px;
 padding-left: 5px;
 padding-right: 5px;
 }
-#hukwltixtq .gt_sourcenotes {
+#pnqizbhooh .gt_sourcenotes {
 color: #333333;
 background-color: #FFFFFF;
 border-bottom-style: none;
@@ -2061,64 +2057,64 @@ border-right-style: none;
 border-right-width: 2px;
 border-right-color: #D3D3D3;
 }
-#hukwltixtq .gt_sourcenote {
+#pnqizbhooh .gt_sourcenote {
 font-size: 90%;
 padding-top: 4px;
 padding-bottom: 4px;
 padding-left: 5px;
 padding-right: 5px;
 }
-#hukwltixtq .gt_left {
+#pnqizbhooh .gt_left {
 text-align: left;
 }
-#hukwltixtq .gt_center {
+#pnqizbhooh .gt_center {
 text-align: center;
 }
-#hukwltixtq .gt_right {
+#pnqizbhooh .gt_right {
 text-align: right;
 font-variant-numeric: tabular-nums;
 }
-#hukwltixtq .gt_font_normal {
+#pnqizbhooh .gt_font_normal {
 font-weight: normal;
 }
-#hukwltixtq .gt_font_bold {
+#pnqizbhooh .gt_font_bold {
 font-weight: bold;
 }
-#hukwltixtq .gt_font_italic {
+#pnqizbhooh .gt_font_italic {
 font-style: italic;
 }
-#hukwltixtq .gt_super {
+#pnqizbhooh .gt_super {
 font-size: 65%;
 }
-#hukwltixtq .gt_footnote_marks {
+#pnqizbhooh .gt_footnote_marks {
 font-size: 75%;
 vertical-align: 0.4em;
 position: initial;
 }
-#hukwltixtq .gt_asterisk {
+#pnqizbhooh .gt_asterisk {
 font-size: 100%;
 vertical-align: 0;
 }
-#hukwltixtq .gt_indent_1 {
+#pnqizbhooh .gt_indent_1 {
 text-indent: 5px;
 }
-#hukwltixtq .gt_indent_2 {
+#pnqizbhooh .gt_indent_2 {
 text-indent: 10px;
 }
-#hukwltixtq .gt_indent_3 {
+#pnqizbhooh .gt_indent_3 {
 text-indent: 15px;
 }
-#hukwltixtq .gt_indent_4 {
+#pnqizbhooh .gt_indent_4 {
 text-indent: 20px;
 }
-#hukwltixtq .gt_indent_5 {
+#pnqizbhooh .gt_indent_5 {
 text-indent: 25px;
 }
-#hukwltixtq .katex-display {
+#pnqizbhooh .katex-display {
 display: inline-flex !important;
 margin-bottom: 0.75em !important;
 }
-#hukwltixtq div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#pnqizbhooh div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
 height: 0px !important;
 }
 </style>
@@ -2193,27 +2189,17 @@ allocation, but also that it should be an area of focus for new imporved
 housing policy implementation.</p>
 </div>
 </div>
-<div id="conclusion" class="section level1">
-<h1>Conclusion</h1>
-<p>There is a clear correlation between SIMD and the number of
-prescriptions for drugs used in preventative asthma inhalers.
-Quantitative and qualitative anlaysis, in Figures 1 and 2 respectively,
-show that this correlation is confined in small geographical areas,
-suggesting that individual living standards could play a major role.
-Confounding factors of chronic asthma and low SIMD of homes include poor
-ventilation, presence of mould and poor heating, suggesting that these
-areas that could benefit from further policy implementation,
-particularly in social housing in the North East of Scotland, as
-demonstrated in Figure 3.</p>
+<div id="discussion" class="section level1">
+<h1>Discussion</h1>
 <div id="limitations" class="section level2">
 <h2>Limitations</h2>
-<p>Figure 2 is limited with the areas used in geographical anaylsis of
-prescriptions per person. As there are only 14 healthboards, datapoints
-within them are particularly varied, meaning that the means extracted
-are not particularly valuable. In the future, gographical analysis by GP
-Cluster would be beneficial to see finer trends as only 5-8 GP practices
-are within each, but shapefile data for GP clusters is currently
-unavailable.</p>
+<p>Figure 2 is limited with the areas used in geographical analysis of
+prescriptions per person. As there are only 14 health boards, data
+points within them are particularly varied, meaning that the means
+extracted are not particularly valuable. In the future, geographical
+analysis by GP Cluster would be beneficial to see finer trends as only
+5-8 GP practices are within each, but shapefile data for GP clusters is
+currently unavailable.</p>
 <p>Figure 3 highlights that not every GP practice is representative of
 their patients’ SIMD status, highlighted by the rows in orange. This is
 logical as only areas with sufficient resources in excess can care for
@@ -2236,6 +2222,24 @@ living standards for the households in the area, including mold level,
 ventilation and heating, along with information about which GP Practice
 each household attends.</p>
 </div>
+<div id="conclusion" class="section level2">
+<h2>Conclusion</h2>
+<p>There is a clear correlation between SIMD and the number of
+prescriptions for drugs used in preventative asthma inhalers.
+Quantitative and qualitative anlaysis, in Figures 1 and 2 respectively,
+show that this correlation is confined in small geographical areas,
+suggesting that individual living standards could play a major role.
+Confounding factors of chronic asthma and low SIMD of homes include poor
+ventilation, presence of mould and poor heating, suggesting that these
+areas that could benefit from further policy implementation,
+particularly in social housing in the North East of Scotland, as
+demonstrated in Figure 3.</p>
+<div id="generative-ai-disclaimer" class="section level3">
+<h3>Generative AI Disclaimer</h3>
+<p>Generative AI has been used in this project for troubleshooting
+errors in code</p>
+</div>
+</div>
 </div>
 <div id="references" class="section level1">
 <h1>References</h1>
@@ -2249,11 +2253,6 @@ Planning Committee: Damp and Mould in Social and Private Rented Housing.
 Available at: <a href="https://patient.info/chest-lungs/asthma-leaflet/asthma-inhalers" class="uri">https://patient.info/chest-lungs/asthma-leaflet/asthma-inhalers</a>.</p>
 <p>World Health Organization (2024). Asthma. [online] World Health
 Organisation. Available at: <a href="https://www.who.int/news-room/fact-sheets/detail/asthma" class="uri">https://www.who.int/news-room/fact-sheets/detail/asthma</a>.</p>
-<div id="generative-ai-disclaimer" class="section level3">
-<h3>Generative AI Disclaimer</h3>
-<p>Generative AI has been used in this project for troubleshooting
-errors in code only</p>
-</div>
 </div>
 
 

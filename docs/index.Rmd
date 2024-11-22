@@ -1,5 +1,5 @@
 ---
-title: "Assessment"
+title: "Assessing the relationship between living standards and chronic asthma"
 author: "Eleanor Harrison"
 date: "`r format(Sys.time(), '%B %d %Y')`"
 output:
@@ -12,7 +12,6 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-# Assessing the relationship between living standards and chronic asthma
 
 # Introduction
 
@@ -20,7 +19,7 @@ Asthma is a common condition worldwide that can be caused by prolonged indoor ex
 
 This exploratory data analysis will investigate whether living standards could have an impact on the prevalence of chronic asthma. To do this, living standards will be defined by SIMD due to the association of social housing with mold, and prevalence of chronic asthma will be measured by the number of prescriptions of drugs used in common preventer inhalers as these are often prescribed when long or short acting bronchodilators are ineffective, suggesting severe chronic asthma.
 
-### Data chosen for Analysis
+## Data chosen for Analysis
 
 **SIMD**
 
@@ -51,7 +50,7 @@ library(gt)
 library(sf)
 ```
 
-### Loading Datasets
+## Loading Datasets
 
 ```{r loading data, message = FALSE}
 #loading datasets with desired variables selected
@@ -96,7 +95,7 @@ prescriptions_pp_analysis <-  simd_prescriptions_gp_join %>%
     .groups = 'drop')
 ```
 
-## Figure 1
+### Figure 1
 
 ```{r initial plot}
 prescriptions_pp_analysis %>% 
@@ -125,7 +124,7 @@ Figure 1 shows that there is a general negative trend in SIMD to number of presc
 
 In order to evaluate this relationship more closely, we can analyse data on a geographical level. Qualitative analysis can be done to assess the average number of prescriptions per healthboard whilst looking at the SIMD of individual GP practices within them. This is shown in Figure 2.
 
-## Figure 2
+### Figure 2
 
 ```{r loading map data, message=FALSE}
 # reading gp gractice location shapefile
@@ -190,11 +189,11 @@ ggplot() +
 
 Health boards with higher average prescriptions (EG) appear to have a a high number of GP Practices with a high SIMD. Additionally, health board with a lower average number of prescriptions (EG) have a significant number of GP Practices with a lower SIMD score. Along with the previous findings in Figure 1, this would suggest that SIMD is affecting the number of prescriptions for preventative inhalers on a smaller geographical level. This would be logical as even neighboring data zones can have drastically different SIMD scores. Together, this indicates that individual living standards really could be having a significant impact on the prevalence chronic asthma.
 
-# Personalised Athma Action Plan (PAAP) Resource Implementation
+# Personalised Asthma Action Plan (PAAP) Resource Implementation
 
 PAAPs are written guides that help patients with Asthma manage their condition with personal instructions in how to respond to different situations. These are very helpful for patients with chronic asthma, but they require a lot of time to put together. By assessing which GP practices have the most cases per person, resources could be better allocated to give the most affected people PAAPs, through methods such as increased GP and nurse training.
 
-## Figure 3
+### Figure 3
 
 ```{r}
 prescriptions_pp_analysis %>% 
@@ -211,7 +210,7 @@ prescriptions_pp_analysis %>%
              columns = c(prescriptions_pp_pgp, simd2020v2country_decile)) %>% 
   fmt_number(columns = prescriptions_pp_pgp, decimals = 2) %>% 
   tab_style(
-    style = cell_fill(color = "#FFBBA7"),
+    style = cell_fill(color = "#E27E7E"),
     locations = cells_body(
       rows = practice_name %in% c("Homeless Health & Resource Services",
                                   "Challenging Behaviour General Practice",
@@ -222,18 +221,22 @@ prescriptions_pp_analysis %>%
 Figure 3 highlights the top 10 GP Practices in Scotland with the most prescriptions for inhalers per person, therefore these practices would likely benefit the most from increased PAAP resource allocation.
 GP Cluster data shows that that 40% of these practices reside in the North East of Scotland, all with SIMD ratings of 1 or 2. This infers that this area in particular would benefit from increased aid in resource allocation, but also that it should be an area of focus for new imporved housing policy implementation.
 
-# Conclusion
-There is a clear correlation between SIMD and the number of prescriptions for drugs used in preventative asthma inhalers. Quantitative and qualitative anlaysis, in Figures 1 and 2 respectively, show that this correlation is confined in small geographical areas, suggesting that individual living standards could play a major role. Confounding factors of chronic asthma and low SIMD of homes include poor ventilation, presence of mould and poor heating, suggesting that these areas that could benefit from further policy implementation, particularly  in social housing in the North East of Scotland, as demonstrated in Figure 3.
+# Discussion
 
 ## Limitations
 
-Figure 2 is limited with the areas used in geographical anaylsis of prescriptions per person. As there are only 14 healthboards, datapoints within them are particularly varied, meaning that the means extracted are not particularly valuable. In the future, gographical analysis by GP Cluster would be beneficial to see finer trends as only 5-8 GP practices are within each, but shapefile data for GP clusters is currently unavailable.
+Figure 2 is limited with the areas used in geographical analysis of prescriptions per person. As there are only 14 health boards, data points within them are particularly varied, meaning that the means extracted are not particularly valuable. In the future, geographical analysis by GP Cluster would be beneficial to see finer trends as only 5-8 GP practices are within each, but shapefile data for GP clusters is currently unavailable.
 
-
-Figure 3 highlights that not every GP practice is representative of their patients' SIMD status, highlighted by the rows in orange. This is logical as only areas with sufficient resources in excess can care for deprived populations, such as those that are homeless. However, this does not change the conclusion that those particular GP Practices would require more aid in giving out PAAPs to their patients. Furthermore, because of the usually defined catchment areas of most GP Practices, this flaw likely only affects a small number of practices, which does not significantly affect the rest of the analysis. This is corroborated as only one data point was removed for analysis in Figure 1 and results were still conclusive.
+Figure 3 highlights that not every GP practice is representative of their patients' SIMD status, highlighted by the rows in red. This is logical as only areas with sufficient resources in excess can care for deprived populations, such as those that are homeless. However, this does not change the conclusion that those particular GP Practices would require more aid in giving out PAAPs to their patients. Furthermore, because of the usually defined catchment areas of most GP Practices, this flaw likely only affects a small number of practices, which does not significantly affect the rest of the analysis. This is corroborated as only one data point was removed for analysis in Figure 1 and results were still conclusive.
 
 Perhaps the most important limitation is the assumption that SIMD is directly correlated to living standards; SIMD is a diverse measure of deprivation meaning that the two cannot be directly correlated. Although there is evidence in literature for this relationship, we cannot make the conclusion that living standards are affecting the prevalence of chronic asthma with confidence. Future analysis would benefit from being done per data zone, with each one being given a score for the average living standards for the households in the area, including mold level, ventilation and heating, along with information about which GP Practice each household attends.
 
+## Conclusion
+There is a clear correlation between SIMD and the number of prescriptions for drugs used in preventative asthma inhalers. Quantitative and qualitative anlaysis, in Figures 1 and 2 respectively, show that this correlation is confined in small geographical areas, suggesting that individual living standards could play a major role. Confounding factors of chronic asthma and low SIMD of homes include poor ventilation, presence of mould and poor heating, suggesting that these areas that could benefit from further policy implementation, particularly  in social housing in the North East of Scotland, as demonstrated in Figure 3.
+
+### Generative AI Disclaimer
+
+Generative AI has been used in this project for troubleshooting errors in code 
 
 # References
 
@@ -244,7 +247,3 @@ The Scottish Parliament (2023). Local Government, Housing and Planning Committee
 .Vincent, P. (2024). Asthma Inhalers. [online] Patient.info. Available at: <https://patient.info/chest-lungs/asthma-leaflet/asthma-inhalers>.
 
 World Health Organization (2024). Asthma. [online] World Health Organisation. Available at: <https://www.who.int/news-room/fact-sheets/detail/asthma>.
-
-### Generative AI Disclaimer
-
-Generative AI has been used in this project for troubleshooting errors in code only
