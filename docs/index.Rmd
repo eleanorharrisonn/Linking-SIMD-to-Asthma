@@ -100,7 +100,7 @@ prescriptions_pp_analysis <-  simd_prescriptions_gp_join %>%
 ```{r initial plot}
 prescriptions_pp_analysis %>% 
 # Some practice codes are dummy practice codes, therefore don't have an associated with SIMD. Data therefore cannot be analysed so is removed removed
-# Homeless Health and Resource Services was an outlier in SIMD group 4, it is not representative of the SIMD of patients and was therefore removed
+# Homeless Health and Resource Services was the only significant  outlier (in SIMD group 4), as it is not representative of the SIMD of patients it has been removed
   filter(simd2020v2country_decile != "NA", practice_name != "Homeless Health & Resource Services") %>% 
 # SIMD decile is used in analysis as it shows the most variation between groups (rather than quintile) so patterns will be easier to visualise
   ggplot(aes(x = simd2020v2country_decile, y = prescriptions_pp_pgp, fill = simd2020v2country_decile)) +
